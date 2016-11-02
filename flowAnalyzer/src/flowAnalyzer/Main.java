@@ -9,7 +9,7 @@ import javax.swing.JPanel;
 @SuppressWarnings("serial")
 public class Main extends JPanel {
   
-	static Stream s = new Stream(40);
+	static Stream s = new Stream();
 	
 	
 	@Override
@@ -24,7 +24,7 @@ public class Main extends JPanel {
 			 e = s.getFlowElement(idx);
 			 g2d.setColor(e.c);
 			 //g2d.drawLine(700,600, e.loc.x,e.loc.y);
-			 g2d.fillOval((int)e.locX,(int)e.locY, 4,4);
+			 g2d.fillOval((int)e.locX,(int)e.locY, 14,14);
 			 
 			
 		}
@@ -44,7 +44,8 @@ public class Main extends JPanel {
 				  s.getFlowElement(idx).move();
 			}
 			game.repaint();
-			Thread.sleep(1000);
+			s.clickStream();
+			Thread.sleep(100);
 		}
 	}
 }
