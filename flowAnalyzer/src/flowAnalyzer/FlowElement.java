@@ -49,7 +49,7 @@ public class FlowElement implements Comparable<FlowElement> {
 	
 	public void speedBreake()
 	{
-		this.speedX = this.speedX / 3;
+		this.speedX = (float) (this.speedX * 0.9);
 	}
 	
 	public void speedDown(){
