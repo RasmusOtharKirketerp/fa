@@ -1,67 +1,127 @@
 package flowAnalyzer;
 
-import java.util.ArrayList;
+import java.util.Vector;
 
 import flowAnalyzer.Util;
 
 public class Stream {
-	int maxSpeed = 3;
+	int maxSpeed = 2;
 	int minSpeed = 1;
 
 	int addRateMin = 1;
-	int addRateMax = 15;
-	int maxCount = 3;
+	int addRateMax = 5;
+	int maxCount = 20;
+
+	int spaceBetweenElement;
 
 	int timeClick = 0;
 
 	int x = 1;
 	int y = 100;
-	public int length = 1600;
+	public int length = 2000;
 
 	int angel = 0;
-	public ArrayList<FlowElement> stream = new ArrayList<FlowElement>();
+	public Vector<FlowElement> stream = new Vector<FlowElement>(10, 10);
 
 	private FlowElement generateNewFlowElement() {
-		return new FlowElement((float) x, (float) y, (float) Util.randInt(minSpeed, maxSpeed), (float) angel);
+		return new FlowElement(x, y, (float) Util.randInt(minSpeed, maxSpeed), (float) angel);
 
 	}
 
-	public Stream() {
-		FlowElement newE = generateNewFlowElement();
-		stream.add(newE);
+	public Stream(int s) {
+		spaceBetweenElement = s;
+		stream.add(0, generateNewFlowElement());
 	}
 
-
-
-	public void clickStream() {
+	private void fillStream() {
 		// fill stream randomly over time
 		if (Util.randInt(addRateMin, addRateMax) == addRateMax)
 			if (stream.size() < maxCount) {
 				FlowElement newE = generateNewFlowElement();
-				stream.add(newE);
+				if (stream.size() > 0 && testImpact(newE, stream.get(0)) == false) {
+					stream.add(0, newE);
+					//System.out.println("Added new Element : " + stream.size());
+				}
+
+			}
+	}
+
+	private boolean testImpact(FlowElement f1, FlowElement f2) {
+		if (f1.nextX() + (spaceBetweenElement / 2) > f2.nextX()) {
+			f1.speedDown();
+			f1.speedBreake();
+			return true;
+		} else {
+			f1.speedUp();
+			return false;
+		}
+	}
+
+	private void adjustSpeed() {
+		for (int j = 0; j < stream.size(); j++) {
+			FlowElement fe = stream.get(j);
+			if (j < stream.size() - 1) {
+				FlowElement fe2 = stream.get(j + 1);
+
+				testImpact(fe, fe2);
+			}
+
+			if (j == stream.size() - 1) {
+				fe.speedUp();
 
 			}
 
-		// Empty stream when flowelement reach end
-		for (int idx = 0; idx < stream.size(); idx++) {
-
-			if (stream.get(idx).locX > this.length)
-				stream.remove(idx);
+			if (Util.randInt(0, 1000) == 0)
+				fe.speedBreake();
 		}
 
+	}
+
+	private void moveElements() {
 		// move elements
-		for (int idx = 0; idx < stream.size(); idx++) {
-				stream.get(idx).move();
+		for (FlowElement flowElement : stream) {
+			flowElement.move();
+		}
+	}
+
+	private void removeElements() {
+
+		if (stream.size() > 0) {
+			int i = 0, delIndx = 0;
+			for (FlowElement flowElement : stream) {
+				i++;
+				if (flowElement.nextX() > length)
+					delIndx = i;
+			}
+			if (delIndx > 0)
+				stream.remove(delIndx - 1);
 		}
 
 	}
 
-	public FlowElement getFlowElement(int idx) {
-		return stream.get(idx);
+	public void clickStream() {
+
+		fillStream();
+		adjustSpeed();
+		moveElements();
+		removeElements();
+		sortStream();
+
+		// debugClickStream();
+
 	}
 
-	public int getSize() {
-		return stream.size();
+	private void sortStream() {
+		stream.sort(null);
+
+	}
+
+	@SuppressWarnings("unused")
+	private void debugClickStream() {
+		for (FlowElement flowElement : stream) {
+			System.out.print(flowElement.locX + " ");
+		}
+		System.out.println();
 	}
 
 }
