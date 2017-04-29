@@ -1,6 +1,5 @@
 package flowAnalyzer;
 
-import java.awt.Color;
 import java.awt.Graphics2D;
 import java.util.Vector;
 
@@ -30,10 +29,19 @@ public class Stream {
 
 	}
 
-	public Stream(int s, int y) {
-		this.y = y;
-		spaceBetweenElement = s;
+	public Stream(int spaceBetweenElement, int yPosition) {
+		this.spaceBetweenElement = spaceBetweenElement;
+		this.y = yPosition;
 		stream.add(0, generateNewFlowElement());
+	}
+
+	public void draw(Graphics2D g2d) {
+
+		for (FlowElement flowElement : stream) {
+			flowElement.draw(g2d);
+
+		}
+
 	}
 
 	private void fillStream() {
@@ -43,7 +51,8 @@ public class Stream {
 				FlowElement newE = generateNewFlowElement();
 				if (stream.size() > 0 && testImpact(newE, stream.get(0)) == false) {
 					stream.add(0, newE);
-					//System.out.println("Added new Element : " + stream.size());
+					// System.out.println("Added new Element : " +
+					// stream.size());
 				}
 
 			}
@@ -112,17 +121,6 @@ public class Stream {
 
 		// debugClickStream();
 
-	}
-	
-	
-	public void draw(Graphics2D g2d){
-		for (FlowElement flowElement : this.stream) {
-			flowElement.draw(g2d);
-
-		}
-		g2d.setColor(Color.WHITE);
-		g2d.drawLine(1, y, 2000, y);
-		this.clickStream();	
 	}
 
 	private void sortStream() {

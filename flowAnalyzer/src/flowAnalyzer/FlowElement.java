@@ -49,7 +49,7 @@ public class FlowElement implements Comparable<FlowElement> {
 	
 	public void speedBreake()
 	{
-		this.speedX = (float) (this.speedX * 0.9);
+		this.speedX = this.speedX / 3;
 	}
 	
 	public void speedDown(){
@@ -64,7 +64,6 @@ public class FlowElement implements Comparable<FlowElement> {
 	}
 
 	public void draw(Graphics2D g2d) {
-		// TODO Auto-generated method stub
 		//g2d.drawString("x:" + this.locX + " s:" + this.speedX, this.locX, this.locY - 20);
 		g2d.setColor(this.c);
 		// g2d.drawLine(700,600, e.loc.x,e.loc.y);
@@ -73,8 +72,6 @@ public class FlowElement implements Comparable<FlowElement> {
 
 	@Override
 	public int compareTo(FlowElement o) {
-		// TODO Auto-generated method stub
-
 		return this.locX - o.locX;
 	}
 }
