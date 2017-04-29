@@ -4,70 +4,63 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 
 public class FlowElement implements Comparable<FlowElement> {
-	// Location prestent
+	// Location present
 
 	int locX, locY;
-	
+
 	int size = 10;
 	
-	float acc = (Util.randInt(1, 10) /10) + 1;
+	boolean didBreak = false;
 
-	private float speedX, speedY;
+	double acc = Util.randInt(10, 100) / 2;
+	//double acc = 1.1;
+
+	//private float speedX, speedY;
 
 	Color cForward = new Color(100, Util.randInt(200, 255), Util.randInt(0, 255));
-	Color cBack = new Color(255,0,0);
+	Color cBack = new Color(255, 0, 0);
 	Color c = new Color(50, Util.randInt(200, 255), 255);
-    
-	
+
+	public void setColor() {
+		// c. = Color(50, Util.randInt(200, 255), 255);
+	}
+
 	public FlowElement(int x, int y, float speed, float angleInDegree) {
 		super();
 		this.locX = x;
 		this.locY = y;
 
-		this.speedX = (float) (speed * Math.cos(Math.toRadians(angleInDegree)));
-		this.speedY = (float) (-speed * (float) Math.sin(Math.toRadians(angleInDegree)));
+		//this.speedX = (float) (speed * Math.cos(Math.toRadians(angleInDegree)));
+		//this.speedY = (float) (-speed * (float) Math.sin(Math.toRadians(angleInDegree)));
 	}
 
 	public void move() {
-		this.locX += this.speedX/30;
-		this.locY += this.speedY/30;
+		this.locX += acc;
+		//this.locY += this.speedY / 1;
 	}
 
 	public float nextX() {
-		return (this.locX + this.speedX);
+		return (this.locX + (int)this.acc);
 	}
 
-	public float nextY() {
-		return (this.locY + this.speedY);
+	public void speedUp() {
+		this.acc += acc/200;
+		//this.c = this.cForward;
+
 	}
-	
-	public void speedUp(){
-		this.speedX += acc;
-		this.c = this.cForward; 
-	
-	}	
-	
-	public void speedBreake()
-	{
-		this.speedX = this.speedX / 3;
+
+	public void speedBreake() {
+		this.acc = this.acc / 30;
 	}
-	
-	public void speedDown(){
-		if (this.speedX > 1)
-			this.speedX = (float) (this.speedX - (this.speedX * 0.9));
-		
+
+	public void speedDown() {
+		speedBreake();
 		this.c = this.cBack;
 	}
 
-	public float getSpeedX() {
-		return speedX;
-	}
-
 	public void draw(Graphics2D g2d) {
-		//g2d.drawString("x:" + this.locX + " s:" + this.speedX, this.locX, this.locY - 20);
-		g2d.setColor(this.c);
-		// g2d.drawLine(700,600, e.loc.x,e.loc.y);
-		g2d.fillOval((int) this.locX, (int) this.locY, size	, size);    
+		g2d.setColor(this.cForward);
+		g2d.fillOval((int) this.locX, (int) this.locY, size, size);
 	}
 
 	@Override
