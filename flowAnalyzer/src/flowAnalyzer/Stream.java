@@ -7,70 +7,75 @@ import java.util.Vector;
 import flowAnalyzer.Util;
 
 public class Stream {
+
+	// Private
 	private double maxAcc = 2;
 	private double minSpeed = 0;
-
 	private boolean canRandomBreake = false;
-	boolean activeBreakeInStream = false;
+	private int streamId = 0;
 
-	int addRateMin = 1;
-	int addRateMax = 5;
-	int maxCount = 20;
+	private FlowElement generateNewFlowElement() {
+		double speed = Util.randInt((int) minSpeed * 1000, (int) maxAcc * 1000) / 100000;
+		return new FlowElement(x, y, speed);
+	}
+
+	// Public
+	public boolean activeBreakeInStream = false;
+	public int addRateMin = 1;
+	public int addRateMax = 5;
+	public int maxCount = 10;
 	public int throughPut = 0;
 	public int BreakCounts = 0;
+	public int spaceBetweenElement;
 
-	int spaceBetweenElement;
-
-	int timeClick = 0;
-
-	int x = 1;
-	int y;
+	public int x = 1;
+	public int y;
 	public int length = 1500;
 	public Vector<FlowElement> stream = new Vector<FlowElement>(10, 10);
 
-	private FlowElement generateNewFlowElement() {
-		
-		double speed = Util.randInt((int)minSpeed*1000, (int)maxAcc*1000) / 100000;
-		
-		return new FlowElement(x, y, speed);
-
-	}
-	
-	
-
-	public double getMaxAcc() {
-		return maxAcc;
-	}
-
-
-
-	public void setMaxAcc(double maxAcc) {
-		this.maxAcc = maxAcc;
-	}
-
-
-
-	public Stream(int spaceBetweenElement, int yPosition, boolean CanBreake) {
+	// Constuctor
+	public Stream(int id,int spaceBetweenElement, int yPosition, boolean CanBreake) {
+		this.streamId = id;
 		this.spaceBetweenElement = spaceBetweenElement;
 		this.y = yPosition;
 		this.canRandomBreake = CanBreake;
 		stream.add(0, generateNewFlowElement());
 	}
 
-	public void draw(Graphics2D g2d) {
+	// getters and setters
+	public double getMaxAcc() {
+		return maxAcc;
+	}
 
+	public void setMaxAcc(double maxAcc) {
+		this.maxAcc = maxAcc;
+	}
+	
+	
+	
+
+	public int getMaxCount() {
+		return maxCount;
+	}
+
+	public void setMaxCount(int maxCount) {
+		this.maxCount = maxCount;
+	}
+
+	public int getStreamId() {
+		return streamId;
+	}
+
+	public void draw(Graphics2D g2d) {
 		for (FlowElement flowElement : stream) {
 			flowElement.draw(g2d);
 		}
-		String txt = "| Breaks :"  + BreakCounts
-				   + " MaxAcc : " + maxAcc;
-		g2d.drawString(txt, length+10, y-15);
+		String txt = "(" + BreakCounts+")";
 		g2d.setColor(Color.CYAN);
-		//g2d.drawRect(length+200, y, throughPut, 10);
-		
-		g2d.fillRect(length+210, y, throughPut, 10);
+		g2d.drawString(txt, length + 10, y+15);
+		g2d.fillRect(length + 100, y, throughPut, 15);
 		g2d.setColor(Color.black);
-		g2d.drawString(""+throughPut,length+210, y-15);
+		g2d.drawString("" + throughPut, length + 100, y+15);
 
 	}
 
@@ -113,12 +118,10 @@ public class Stream {
 		boolean impact = collision(a, b);
 
 		boolean retVal = false;
-		
+
 		if (impact) {
-			a.speedDown(b.acc);
-			// f1.speedBreake();
-			// f1.acc = f2.acc;
-			retVal =  true;
+			a.speedDown(b.acc * 0.9);
+			retVal = true;
 		} else {
 			a.speedUp(maxAcc);
 			retVal = false;
@@ -126,19 +129,38 @@ public class Stream {
 		return retVal;
 	}
 	
+	private int getLengthInElementBetween(FlowElement a, FlowElement b){
+		int retVal = 0;
+		retVal = (b.locX - a.locX) / a.size;	
+		return retVal;
+	}
+
 	private void adjustSpeed() {
+		int spaceBetween = 0;
 		for (int j = 0; j < stream.size() - 1; j++) {
 			FlowElement a = stream.get(j);
+			
+			// Test for impact
 			if (j < stream.size()) {
 				FlowElement b = stream.get(j + 1);
-				testImpact(a,b);
+				testImpact(a, b);
+				// test for adjust speed 
+				if (this.getStreamId() > 16){
+					spaceBetween = getLengthInElementBetween(a, b);
+					if (spaceBetween > 2 && spaceBetween < 10)
+					{
+						a.speedDown(b.acc);
+					}
+					
+				}
 
 			}
 			
+			
 
-			// setup random breake
+			// setup random breaks
 			if (canRandomBreake && activeBreakeInStream == false && a.locX > length / 4)
-				if (Util.randInt(0, 5000) == 0) {
+				if (Util.randInt(0, 10000) == 0) {
 					a.speedBreake();
 					activeBreakeInStream = true;
 					this.BreakCounts += 1;
@@ -146,15 +168,13 @@ public class Stream {
 		}
 		stream.lastElement().cForward = Color.PINK;
 		stream.lastElement().speedUp(maxAcc);
-		
-		
 
 	}
 
 	private void moveElements() {
 		// move elements
 		for (FlowElement flowElement : stream) {
-			 
+
 			flowElement.move();
 		}
 	}
@@ -169,8 +189,7 @@ public class Stream {
 				i++;
 			}
 			if (delIndx > 0) {
-				if (stream.get(delIndx).didBreak == true)
-				{
+				if (stream.get(delIndx).didBreak == true) {
 					activeBreakeInStream = false;
 				}
 				this.throughPut += 1;

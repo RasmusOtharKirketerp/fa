@@ -13,7 +13,7 @@ import javax.swing.JPanel;
 @SuppressWarnings("serial")
 public class Main extends JPanel {
 
-	static River river = new River(50);
+	static River river = new River(30);
 
 	@Override
 	public void paint(Graphics g) {
@@ -33,6 +33,12 @@ public class Main extends JPanel {
 			}
 			if (e.getKeyChar() == 's') {
 				river.ChangeSpeedToStream(-1);
+			}
+			if (e.getKeyChar() == 'd') {
+				river.ChangeMaxCount(+1);
+			}
+			if (e.getKeyChar() == 'a') {
+				river.ChangeMaxCount(-1);
 			}
 			if (e.getKeyChar() == 'r') {
 				river.reset();
