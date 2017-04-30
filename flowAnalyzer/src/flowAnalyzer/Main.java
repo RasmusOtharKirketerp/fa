@@ -4,6 +4,9 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
@@ -21,6 +24,31 @@ public class Main extends JPanel {
 		this.setBackground(Color.black);
 		river.draw(g2d);
 	}
+	static public KeyListener myKL = new KeyListener() {
+
+		@Override
+		public void keyTyped(KeyEvent e) {
+			if (e.getKeyChar() == 'w') {
+				river.ChangeSpeedToStream(+1);
+			}
+			if (e.getKeyChar() == 's') {
+				river.ChangeSpeedToStream(-1);
+			}
+			if (e.getKeyChar() == 'r') {
+				river.reset();
+			}
+
+		}
+
+		@Override
+		public void keyReleased(KeyEvent e) {
+
+		}
+
+		@Override
+		public void keyPressed(KeyEvent e) {
+		}
+	};
 
 	public static void main(String[] args) throws InterruptedException {
 		JFrame frame = new JFrame("FlowAnlyzer by ROM soft");
@@ -29,10 +57,11 @@ public class Main extends JPanel {
 		frame.setSize(2000, 1000);
 		frame.setVisible(true);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.addKeyListener(myKL);
 
 		while (true) {
 			game.repaint();
-			Thread.sleep(2);
+			Thread.sleep(1);
 		}
 	}
 }

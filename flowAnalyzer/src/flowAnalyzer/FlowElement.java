@@ -3,19 +3,21 @@ package flowAnalyzer;
 import java.awt.Color;
 import java.awt.Graphics2D;
 
+import javax.swing.plaf.basic.BasicInternalFrameTitlePane.MaximizeAction;
+
 public class FlowElement implements Comparable<FlowElement> {
 	// Location present
 
 	int locX, locY;
 
 	int size = 10;
-	
+
 	boolean didBreak = false;
 
-	double acc = Util.randInt(10, 100) / 2;
-	//double acc = 1.1;
+	double acc = Util.randInt(10, 100) / 4;
+	// double acc = 1.1;
 
-	//private float speedX, speedY;
+	// private float speedX, speedY;
 
 	Color cForward = new Color(100, Util.randInt(200, 255), Util.randInt(0, 255));
 	Color cBack = new Color(255, 0, 0);
@@ -25,36 +27,38 @@ public class FlowElement implements Comparable<FlowElement> {
 		// c. = Color(50, Util.randInt(200, 255), 255);
 	}
 
-	public FlowElement(int x, int y, float speed, float angleInDegree) {
+	public FlowElement(int x, int y, double speed) {
 		super();
 		this.locX = x;
 		this.locY = y;
-
-		//this.speedX = (float) (speed * Math.cos(Math.toRadians(angleInDegree)));
-		//this.speedY = (float) (-speed * (float) Math.sin(Math.toRadians(angleInDegree)));
 	}
 
 	public void move() {
+
 		this.locX += acc;
-		//this.locY += this.speedY / 1;
+
+		// this.locY += this.speedY / 1;
 	}
 
 	public float nextX() {
-		return (this.locX + (int)this.acc);
+		return (this.locX + (int) this.acc);
 	}
 
-	public void speedUp() {
-		this.acc += acc/200;
-		//this.c = this.cForward;
+	public void speedUp(double maxAcc) {
+		if (acc < maxAcc)
+			this.acc *= 1.01;
+		// this.c = this.cForward;
 
 	}
 
 	public void speedBreake() {
-		this.acc = this.acc / 30;
+		this.acc /= 40;
+		this.didBreak = true;
+
 	}
 
-	public void speedDown() {
-		speedBreake();
+	public void speedDown(double elementAheadSpeed) {
+		this.acc = elementAheadSpeed * 0.99;
 		this.c = this.cBack;
 	}
 

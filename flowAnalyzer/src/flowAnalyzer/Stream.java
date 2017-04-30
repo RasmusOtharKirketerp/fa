@@ -1,20 +1,23 @@
 package flowAnalyzer;
 
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.util.Vector;
 
 import flowAnalyzer.Util;
 
 public class Stream {
-	private int maxSpeed = 2;
-	private int minSpeed = 1;
+	private double maxAcc = 2;
+	private double minSpeed = 0;
 
 	private boolean canRandomBreake = false;
 	boolean activeBreakeInStream = false;
 
 	int addRateMin = 1;
 	int addRateMax = 5;
-	int maxCount = 200;
+	int maxCount = 20;
+	public int throughPut = 0;
+	public int BreakCounts = 0;
 
 	int spaceBetweenElement;
 
@@ -23,14 +26,29 @@ public class Stream {
 	int x = 1;
 	int y;
 	public int length = 1500;
-
-	int angel = 0;
 	public Vector<FlowElement> stream = new Vector<FlowElement>(10, 10);
 
 	private FlowElement generateNewFlowElement() {
-		return new FlowElement(x, y, (float) Util.randInt(minSpeed, maxSpeed), (float) angel);
+		
+		double speed = Util.randInt((int)minSpeed*1000, (int)maxAcc*1000) / 100000;
+		
+		return new FlowElement(x, y, speed);
 
 	}
+	
+	
+
+	public double getMaxAcc() {
+		return maxAcc;
+	}
+
+
+
+	public void setMaxAcc(double maxAcc) {
+		this.maxAcc = maxAcc;
+	}
+
+
 
 	public Stream(int spaceBetweenElement, int yPosition, boolean CanBreake) {
 		this.spaceBetweenElement = spaceBetweenElement;
@@ -44,6 +62,15 @@ public class Stream {
 		for (FlowElement flowElement : stream) {
 			flowElement.draw(g2d);
 		}
+		String txt = "| Breaks :"  + BreakCounts
+				   + " MaxAcc : " + maxAcc;
+		g2d.drawString(txt, length+10, y-15);
+		g2d.setColor(Color.CYAN);
+		//g2d.drawRect(length+200, y, throughPut, 10);
+		
+		g2d.fillRect(length+210, y, throughPut, 10);
+		g2d.setColor(Color.black);
+		g2d.drawString(""+throughPut,length+210, y-15);
 
 	}
 
@@ -61,56 +88,73 @@ public class Stream {
 		}
 	}
 
-	private boolean validateForImpactVersion2(FlowElement f1, FlowElement f2) {
-		if (f1.nextX() > (f2.locX - f2.size)) {
-			return true;
-		} else {
-			return false;
-		}
+	private boolean collision(FlowElement f1, FlowElement f2) {
+		// A--------> ( Anew ) ------------------------------------------= false
+		// A ----------------------------------> ( Anew ) ---------------= true
+		// A -----------------> ( Anew ) --------------------------------= true
+		// --------------------( B )
+		// ---------------------------------------------
+
+		double aNew = f1.locX + f1.acc + (f2.size / 2);
+		double b = f2.locX - (f2.size / 2);
+
+		boolean retval = true;
+
+		if (aNew <= b)
+			retval = false;
+		if (aNew > b)
+			retval = true;
+
+		return retval;
 
 	}
 
-	private boolean testImpact(FlowElement f1, FlowElement f2) {
-		boolean impact = validateForImpactVersion2(f1, f2);
+	private boolean testImpact(FlowElement a, FlowElement b) {
+		boolean impact = collision(a, b);
 
+		boolean retVal = false;
+		
 		if (impact) {
-			f1.speedDown();
+			a.speedDown(b.acc);
 			// f1.speedBreake();
-			f1.acc = f2.acc;
-			return true;
+			// f1.acc = f2.acc;
+			retVal =  true;
 		} else {
-			f1.speedUp();
-			return false;
+			a.speedUp(maxAcc);
+			retVal = false;
 		}
+		return retVal;
 	}
-
+	
 	private void adjustSpeed() {
-		for (int j = 0; j < stream.size(); j++) {
-			FlowElement fe = stream.get(j);
-			if (j < stream.size() - 1) {
-				FlowElement fe2 = stream.get(j + 1);
+		for (int j = 0; j < stream.size() - 1; j++) {
+			FlowElement a = stream.get(j);
+			if (j < stream.size()) {
+				FlowElement b = stream.get(j + 1);
+				testImpact(a,b);
 
-				testImpact(fe, fe2);
 			}
+			
 
-			if (canRandomBreake &&
-				activeBreakeInStream == false &&
-					 fe.locX > length/ 2)
-				if (Util.randInt(0, 5000) == 0)
-				{
-					fe.speedBreake();
+			// setup random breake
+			if (canRandomBreake && activeBreakeInStream == false && a.locX > length / 4)
+				if (Util.randInt(0, 5000) == 0) {
+					a.speedBreake();
 					activeBreakeInStream = true;
-					fe.didBreak = true;
+					this.BreakCounts += 1;
 				}
-			if (j == stream.size()-1) //last element
-				fe.speedUp();
 		}
+		stream.lastElement().cForward = Color.PINK;
+		stream.lastElement().speedUp(maxAcc);
+		
+		
 
 	}
 
 	private void moveElements() {
 		// move elements
 		for (FlowElement flowElement : stream) {
+			 
 			flowElement.move();
 		}
 	}
@@ -120,15 +164,18 @@ public class Stream {
 		if (stream.size() > 0) {
 			int i = 0, delIndx = 0;
 			for (FlowElement flowElement : stream) {
-				i++;
 				if (flowElement.locX > length)
 					delIndx = i;
+				i++;
 			}
-			if (delIndx > 0)
-			{
-				if (stream.get(delIndx-1).didBreak == true)
+			if (delIndx > 0) {
+				if (stream.get(delIndx).didBreak == true)
+				{
 					activeBreakeInStream = false;
-				stream.remove(delIndx - 1);
+				}
+				this.throughPut += 1;
+				stream.remove(delIndx);
+
 			}
 		}
 
@@ -140,9 +187,6 @@ public class Stream {
 		adjustSpeed();
 		moveElements();
 		removeElements();
-		//sortStream();
-
-		// debugClickStream();
 
 	}
 
