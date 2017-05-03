@@ -9,7 +9,7 @@ import flowAnalyzer.Util;
 public class Stream {
 
 	// Private
-	private double maxAcc = 2;
+	private double maxAcc = 10;
 	private double minSpeed = 0;
 	private boolean canRandomBreake = false;
 	private int streamId = 0;
@@ -33,8 +33,8 @@ public class Stream {
 	public int length = 1500;
 	public Vector<FlowElement> stream = new Vector<FlowElement>(10, 10);
 
-	// Constuctor
-	public Stream(int id,int spaceBetweenElement, int yPosition, boolean CanBreake) {
+	// Constructor
+	public Stream(int id, int spaceBetweenElement, int yPosition, boolean CanBreake) {
 		this.streamId = id;
 		this.spaceBetweenElement = spaceBetweenElement;
 		this.y = yPosition;
@@ -49,10 +49,9 @@ public class Stream {
 
 	public void setMaxAcc(double maxAcc) {
 		this.maxAcc = maxAcc;
+		if (this.maxAcc < 0)
+			this.maxAcc = 0.01;
 	}
-	
-	
-	
 
 	public int getMaxCount() {
 		return maxCount;
@@ -66,17 +65,41 @@ public class Stream {
 		return streamId;
 	}
 
-	public void draw(Graphics2D g2d) {
+	public void drawStreams(Graphics2D g2d) {
+		// draw all FlowElements in the stream
 		for (FlowElement flowElement : stream) {
 			flowElement.draw(g2d);
+
 		}
-		String txt = "(" + BreakCounts+")";
-		g2d.setColor(Color.CYAN);
-		g2d.drawString(txt, length + 10, y+15);
+
+		// draw line to show the last element in stream
+		g2d.setColor(Color.DARK_GRAY);
+		g2d.drawLine(stream.lastElement().locX, stream.lastElement().locY + 5, length, y + 5);
+		// draw line from the first element to the last
+		g2d.setColor(Color.LIGHT_GRAY);
+		g2d.drawLine(stream.firstElement().locX, stream.firstElement().locY + 5, stream.lastElement().locX, stream.lastElement().locY + 5);
+
+	}
+
+	public void drawStreamData(Graphics2D g2d, int maxID) {
+		String txt = "(" + BreakCounts + ")";
+		if (this.streamId == maxID)
+			g2d.setColor(Color.CYAN);
+		else
+			g2d.setColor(Color.magenta);
+		g2d.drawString(txt, length + 10, y + 15);
 		g2d.fillRect(length + 100, y, throughPut, 15);
 		g2d.setColor(Color.black);
-		g2d.drawString("" + throughPut, length + 100, y+15);
+		g2d.drawString("" + throughPut, length + 100, y + 15);
 
+	}
+
+	public void draw(Graphics2D g2d, int maxID) {
+		// This procedure draw all elements on the screen
+
+		drawStreams(g2d);
+
+		drawStreamData(g2d, maxID);
 	}
 
 	private void fillStream() {
@@ -128,10 +151,10 @@ public class Stream {
 		}
 		return retVal;
 	}
-	
-	private int getLengthInElementBetween(FlowElement a, FlowElement b){
+
+	private int getLengthInElementBetween(FlowElement a, FlowElement b) {
 		int retVal = 0;
-		retVal = (b.locX - a.locX) / a.size;	
+		retVal = (b.locX - a.locX) / a.size;
 		return retVal;
 	}
 
@@ -139,24 +162,21 @@ public class Stream {
 		int spaceBetween = 0;
 		for (int j = 0; j < stream.size() - 1; j++) {
 			FlowElement a = stream.get(j);
-			
+
 			// Test for impact
 			if (j < stream.size()) {
 				FlowElement b = stream.get(j + 1);
 				testImpact(a, b);
-				// test for adjust speed 
-				if (this.getStreamId() > 16){
+				// test for adjust speed
+				if (this.getStreamId() > 16) {
 					spaceBetween = getLengthInElementBetween(a, b);
-					if (spaceBetween > 2 && spaceBetween < 10)
-					{
+					if (spaceBetween > 2 && spaceBetween < 10) {
 						a.speedDown(b.acc);
 					}
-					
+
 				}
 
 			}
-			
-			
 
 			// setup random breaks
 			if (canRandomBreake && activeBreakeInStream == false && a.locX > length / 4)

@@ -14,6 +14,8 @@ import javax.swing.JPanel;
 public class Main extends JPanel {
 
 	static River river = new River(30);
+	
+	
 
 	@Override
 	public void paint(Graphics g) {
@@ -29,10 +31,10 @@ public class Main extends JPanel {
 		@Override
 		public void keyTyped(KeyEvent e) {
 			if (e.getKeyChar() == 'w') {
-				river.ChangeSpeedToStream(+1);
+				river.ChangeSpeedToStream(1.01);
 			}
 			if (e.getKeyChar() == 's') {
-				river.ChangeSpeedToStream(-1);
+				river.ChangeSpeedToStream(0.99);
 			}
 			if (e.getKeyChar() == 'd') {
 				river.ChangeMaxCount(+1);
@@ -67,7 +69,7 @@ public class Main extends JPanel {
 
 		while (true) {
 			game.repaint();
-			Thread.sleep(1);
+			Thread.sleep(10);
 		}
 	}
 }

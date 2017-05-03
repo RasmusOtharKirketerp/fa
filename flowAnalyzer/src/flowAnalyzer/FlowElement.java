@@ -15,7 +15,7 @@ public class FlowElement implements Comparable<FlowElement> {
 	boolean didBreak = false;
 
 	//double acc = Util.randInt(10, 100) / 4;
-	double acc = Util.randInt(1, 3);
+	double acc = Util.randInt(1, 30);
 	// double acc = 1.1;
 
 	// private float speedX, speedY;
@@ -36,7 +36,7 @@ public class FlowElement implements Comparable<FlowElement> {
 
 	public void move() {
 
-		this.locX += acc;
+		this.locX += Math.round(acc/10);
 
 		// this.locY += this.speedY / 1;
 	}
@@ -61,8 +61,10 @@ public class FlowElement implements Comparable<FlowElement> {
 
 	public void speedDown(double elementAheadSpeed) {
 		this.acc = elementAheadSpeed * 0.50;
+		if (acc < 0)
 		this.c = this.cBack;
 		this.cForward =this.cBack;
+		
 	}
 
 	public void draw(Graphics2D g2d) {
